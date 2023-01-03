@@ -16,9 +16,41 @@ const getShopsDataBySearch = async (req, res) => {
   await shopsDataModel
     .find({
       $or: [
-        { CustomerCity: req.body.name.toUpperCase() },
+        { CustomerCity: { $regex: req.body.name.toUpperCase() } },
         { BrandName: req.body.name.toUpperCase() },
         { CustomerStateCode: req.body.name.toUpperCase() },
+      ],
+    })
+    .then((data) => {
+      return res.status(200).json({ success: true, data });
+    })
+    .catch((err) => {
+      return res.status(400).json({ success: false, err });
+    });
+};
+
+const getShop = async (req, res) => {
+  console.log(req.body.name);
+  await shopsDataModel
+    .find({
+      $or: [
+        {
+          CustomerCity: { $regex: new RegExp("^" + req.body.name + ".*", "i") },
+        },
+        { BrandName: { $regex: new RegExp("^" + req.body.name + ".*", "i") } },
+        {
+          CustomerStateCode: {
+            $regex: new RegExp("^" + req.body.name + ".*", "i"),
+          },
+        },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $toString: { $toInt: "$AddressBookNumber" } },
+              regex: req.body.name.toString(),
+            },
+          },
+        },
       ],
     })
     .then((data) => {
@@ -82,4 +114,5 @@ const getShopsDataBySearch = async (req, res) => {
 module.exports = {
   getShopsData,
   getShopsDataBySearch,
+  getShop,
 };
