@@ -51,6 +51,14 @@ const getShop = async (req, res) => {
             },
           },
         },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $toString: { $toInt: "$CustomerPostalCode" } },
+              regex: req.body.name.toString(),
+            },
+          },
+        },
       ],
     })
     .then((data) => {
